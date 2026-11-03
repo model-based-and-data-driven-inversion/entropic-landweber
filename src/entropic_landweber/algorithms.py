@@ -42,9 +42,20 @@ def entropic_landweber(
     z_true: np.ndarray | None = None,
     weights: np.ndarray | None = None,
     track_history: bool = True,
+    use_cumulative_form: bool = True,
 ) -> IterationResult:
-    r"""Run the Entropic Landweber iteration (Proposition 3.1, Eq. 14):
+    r"""Run the Entropic Landweber iteration (Proposition 3.1, Eq. 14 / Section 6.2):
 
+    When `use_cumulative_form=True` (Section 6.2, page 17):
+    .. math::
+        \tilde{y}_{k+1} = \tilde{y}_k + A u_k, \quad \tilde{y}_0 = 0
+        u_{k+1}(x) = c_k^m \cdots c_0^m u_0(x) \exp\left( \lambda A^*((k+1)y - \tilde{y}_{k+1})(x) \right)
+
+    This formulation keeps the marginal computational cost for evaluating the
+    forward operator constant per iteration while computing the iterate directly
+    from :math:`u_0`.
+
+    When `use_cumulative_form=False` (Eq. 14):
     .. math::
         u_{k+1} = u_k c_k^m \exp\left( \lambda A^*(y - A u_k) \right)
 
@@ -77,6 +88,9 @@ def entropic_landweber(
         Quadrature weights. If None, retrieved from operator if available.
     track_history : bool, optional
         Whether to record energy and error at every iteration.
+    use_cumulative_form : bool, optional
+        Whether to use the recursive accumulator \tilde{y}_{k+1} = \tilde{y}_k + A u_k
+        from Section 6.2, by default True.
 
     Returns
     -------
@@ -91,6 +105,10 @@ def entropic_landweber(
     u = np.asarray(u0, dtype=float).copy()
     if m == 1 and weights is not None:
         u = u / np.sum(u * weights)
+    u_init = u.copy()
+
+    # Recursive accumulator \tilde{y}_k = \sum_{l=0}^{k-1} A u_l (Section 6.2, page 17)
+    tilde_y = np.zeros_like(y, dtype=complex if np.iscomplexobj(y) else float)
 
     energies = []
     l1_errs = [] if z_true is not None else None
@@ -120,9 +138,16 @@ def entropic_landweber(
             k_star = k
             break
 
-        # Compute exponent: \lambda A^*(y - A u_k)
-        grad = op.apply_adjoint(res)
-        u_next = u * np.exp(lam * grad)
+        if use_cumulative_form:
+            # Recursive accumulator: \tilde{y}_{k+1} = \tilde{y}_k + A u_k
+            tilde_y = tilde_y + Au
+            cum_res = (k + 1) * y - tilde_y
+            cum_grad = op.apply_adjoint(cum_res)
+            u_next = u_init * np.exp(lam * cum_grad)
+        else:
+            # Step-wise multiplicative update: u_{k+1} = u_k * exp(\lambda A^*(y - A u_k))
+            grad = op.apply_adjoint(res)
+            u_next = u * np.exp(lam * grad)
 
         if m == 1:
             total_mass = np.sum(u_next * weights) if weights is not None else np.sum(u_next)

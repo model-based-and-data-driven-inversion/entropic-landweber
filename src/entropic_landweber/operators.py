@@ -71,6 +71,7 @@ class FredholmOperator:
 
         self.w_x = trapezoidal_weights(len(self.x_grid), self.dx)
         self.w_y = trapezoidal_weights(len(self.y_grid), self.dy)
+        self.weights = self.w_y
 
         # Kernel matrix K[i, j] = k(x_i, y_j)
         self.K = np.asarray(kernel_fn(self.x_grid[:, None], self.y_grid[None, :]), dtype=float)

@@ -35,6 +35,22 @@ class TestAlgorithms(unittest.TestCase):
         diffs = np.diff(res.energies)
         self.assertTrue(np.all(diffs <= 1e-12))
 
+    def test_cumulative_vs_stepwise_equivalence(self) -> None:
+        """Verify Section 6.2: recursive cumulative accumulator matches step-wise update."""
+        x = np.linspace(0, 1, 50)
+        op = FredholmOperator(kernel_1, x)
+        z = exact_solution_1(x, sigma2=0.01, normalize=True)
+        y = op.apply(z)
+        u0 = np.ones_like(x)
+
+        # Run with cumulative form (use_cumulative_form=True)
+        res_cum = entropic_landweber(op, y, u0, lam=0.8, n_iterations=25, m=1, use_cumulative_form=True)
+        # Run with step-wise form (use_cumulative_form=False)
+        res_step = entropic_landweber(op, y, u0, lam=0.8, n_iterations=25, m=1, use_cumulative_form=False)
+
+        np.testing.assert_allclose(res_cum.u_final, res_step.u_final, rtol=1e-12, atol=1e-12)
+        np.testing.assert_allclose(res_cum.energies, res_step.energies, rtol=1e-12, atol=1e-12)
+
     def test_projected_landweber_positivity(self) -> None:
         """Check that Projected Landweber preserves nonnegativity."""
         x = np.linspace(0, 1, 60)

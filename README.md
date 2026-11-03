@@ -41,9 +41,21 @@ with normalisation scalar:
 
 $$c_k^m = \begin{cases} 1 & \text{if } m = 0, \\ \displaystyle \frac{1}{\int_\Omega u_k(t) \exp\left( \lambda (A^*(y - A u_k))(t) \right) \mathrm{d}t} & \text{if } m = 1. \end{cases}$$
 
+#### Constant-Cost Cumulative Formulation (Section 6.2)
+
+As detailed on page 17 of the paper, the update can also be written directly in terms of the initialisation $u_0$ and the cumulative historical evaluations:
+
+$$u_k(x) = c_{k-1}^m \cdots c_0^m u_0(x) \exp\left( \lambda A^*(k y - \tilde{y}_k)(x) \right)$$
+
+with the recursive accumulator:
+
+$$\tilde{y}_0 = 0, \quad \tilde{y}_{k+1} = \tilde{y}_k + A u_k$$
+
+Because only a single forward operation $A u_k$ is computed per iteration, this formulation has the advantage that the marginal numerical costs for evaluating the integrals remain constant over time while eliminating accumulated step-wise multiplicative drift. Both formulations are supported in `entropic_landweber` (`use_cumulative_form=True` by default), with trapezoidal quadrature employed throughout for all integral evaluations.
+
 ### Implemented Methods
 
-1. **Entropic Landweber (Full Operator)**: Multiplicative gradient descent with Shannon entropy Bregman distance, with or without unit integral normalisation.
+1. **Entropic Landweber (Full Operator)**: Multiplicative gradient descent with Shannon entropy Bregman distance, with or without unit integral normalisation, implementing both the recursive accumulator $\tilde{y}_k$ and step-wise representations.
 2. **Randomised / Stochastic Entropic Landweber**: Row-action stochastic mirror descent where operator $A$ is partitioned into $M$ rows, updating via single sampled equations:
    $$u_{k+1} = u_k c_k^m \exp\left( \lambda M A_{J(k)}^* (y_{J(k)} - A_{J(k)} u_k) \right)$$
 3. **Projected Landweber Iteration**:
