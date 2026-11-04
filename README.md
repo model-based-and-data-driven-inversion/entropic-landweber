@@ -204,7 +204,7 @@ python scripts/run_figure2.py
 #### Figure 3: Reconstruction of $z_1$ from Discrete Fourier Samples
 Evaluates Entropic Landweber on 16 discrete Fourier measurements of $z_1$:
 - Exact data ($\sigma = 0$): 201 iterations achieving residual energy $5.10 \times 10^{-9}$.
-- Noisy data ($\sigma = 1/500$): Discrepancy stopping criterion terminates the algorithm when $\frac{1}{2}\|Au_k - y^\delta\|^2 \le \delta$.
+- Noisy data ($\sigma = 1/500$): Discrepancy stopping criterion terminates the algorithm when $\frac{1}{2}\Vert Au_k - y^\delta\Vert^2 \le \delta$.
 
 ```bash
 python scripts/run_figure3.py
@@ -220,7 +220,7 @@ python scripts/run_figure4.py
 ```
 
 #### Figure 5: $L^1$ Error Analysis Confirming Proposition 4.1
-Plots $\|u^k - z\|_{L^1}$ versus iteration count $k$:
+Plots $\Vert u^k - z\Vert_{L^1}$ versus iteration count $k$:
 - $z_1$: Confirms $O(1/\sqrt{k})$ convergence in $L^1$ norm predicted by Proposition 4.1.
 - $z_2$: Confirms stagnation and failure of asymptotic convergence when the source condition is violated.
 
@@ -235,7 +235,7 @@ python scripts/run_figure5.py
 A comprehensive unit test suite verifies mathematical properties and implementation invariants:
 - **`test_functionals.py`**: Non-negativity and zero-annihilation of the Kullback–Leibler divergence, and entropy calculation.
 - **`test_operators.py`**: Exact adjointness check $\langle Au, v \rangle = \langle u, A^{\ast} v \rangle$ for both Fredholm and discrete Fourier operators.
-- **`test_algorithms.py`**: Non-negativity preservation ($u_k \ge 0$), total mass preservation ($\int u_k = 1$ when $m = 1$), and monotonic residual decrease $\frac{1}{2}\|Au_{k+1} - y\|^2 \le \frac{1}{2}\|Au_k - y\|^2$ (Proposition 3.3).
+- **`test_algorithms.py`**: Non-negativity preservation ($u_k \ge 0$), total mass preservation ($\int u_k = 1$ when $m = 1$), and monotonic residual decrease $\frac{1}{2}\Vert Au_{k+1} - y\Vert^2 \le \frac{1}{2}\Vert Au_k - y\Vert^2$ (Proposition 3.3).
 
 Run the tests using Python's standard `unittest` framework:
 
