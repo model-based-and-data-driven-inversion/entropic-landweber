@@ -13,7 +13,9 @@ A Python package and replication repository for the algorithms, numerical experi
 
 The repository provides modular, verified Python implementations of the entropic Landweber regularisation scheme for solving linear ill-posed operator equations:
 
-$$A u = y$$
+$$
+A u = y
+$$
 
 where $A: L^1(\Omega) \to Y$ is a bounded linear operator into a Hilbert space $Y$, and the unknown $u$ is constrained to be non-negative ($u \ge 0$) or a continuous probability density ($\int_\Omega u(t) \, \mathrm{d}t = 1$).
 
@@ -21,11 +23,15 @@ where $A: L^1(\Omega) \to Y$ is a bounded linear operator into a Hilbert space $
 
 The iterative scheme arises from linearising the $L^2$ data-fidelity term at the current iterate $u_k$ and regularising with the Kullback–Leibler divergence (Bregman distance induced by the Boltzmann–Shannon entropy):
 
-$$u_{k+1} = \arg\min_{u \ge 0} \left\{ \langle Au - y, Au_k - y \rangle + c \, d(u, u_k) + \chi_m(u) \right\}, \quad m \in \{0, 1\}$$
+$$
+u_{k+1} = \arg\min_{u \ge 0} \left\lbrace \langle Au - y, Au_k - y \rangle + c \, d(u, u_k) + \chi_m(u) \right\rbrace, \quad m \in \lbrace 0, 1 \rbrace
+$$
 
 where $c > 0$ is a penalty parameter ($\lambda = 1/c$ is the effective step size), $d(u, u_k)$ is the Kullback–Leibler divergence:
 
-$$d(u, u_k) = \int_\Omega \left( u(t) \ln\frac{u(t)}{u_k(t)} - u(t) + u_k(t) \right) \mathrm{d}t$$
+$$
+d(u, u_k) = \int_\Omega \left( u(t) \ln\frac{u(t)}{u_k(t)} - u(t) + u_k(t) \right) \mathrm{d}t
+$$
 
 and $\chi_m$ enforces mass constraints:
 - **$m = 0$ (Unconstrained mass)**: $\chi_0 \equiv 0$, preserving non-negativity $u \ge 0$.
@@ -35,33 +41,53 @@ and $\chi_m$ enforces mass constraints:
 
 Minimising the functional yields the closed-form multiplicative update (Proposition 3.1):
 
-$$u_{k+1} = u_k c_k^m \exp\left( \lambda A^*(y - A u_k) \right)$$
+$$
+u_{k+1} = u_k c_k^m \exp\left( \lambda A^{\ast}(y - A u_k) \right)
+$$
 
 with normalisation scalar:
 
-$$c_k^m = \begin{cases} 1 & \text{if } m = 0, \\ \displaystyle \frac{1}{\int_\Omega u_k(t) \exp\left( \lambda (A^*(y - A u_k))(t) \right) \mathrm{d}t} & \text{if } m = 1. \end{cases}$$
+$$
+c_k^m = \begin{cases} 1 & \text{if } m = 0, \\\\ \displaystyle \frac{1}{\int_\Omega u_k(t) \exp\left( \lambda (A^{\ast}(y - A u_k))(t) \right) \mathrm{d}t} & \text{if } m = 1. \end{cases}
+$$
 
 #### Constant-Cost Cumulative Formulation (Section 6.2)
 
 As detailed on page 17 of the paper, the update can also be written directly in terms of the initialisation $u_0$ and the cumulative historical evaluations:
 
-$$u_k(x) = c_{k-1}^m \cdots c_0^m u_0(x) \exp\left( \lambda A^*(k y - \tilde{y}_k)(x) \right)$$
+$$
+u_k(x) = c_{k-1}^m \cdots c_0^m u_0(x) \exp\left( \lambda A^{\ast}(k y - \tilde{y}_k)(x) \right)
+$$
 
 with the recursive accumulator:
 
-$$\tilde{y}_0 = 0, \quad \tilde{y}_{k+1} = \tilde{y}_k + A u_k$$
+$$
+\tilde{y}_0 = 0, \quad \tilde{y}_{k+1} = \tilde{y}_k + A u_k
+$$
 
 Because only a single forward operation $A u_k$ is computed per iteration, this formulation has the advantage that the marginal numerical costs for evaluating the integrals remain constant over time while eliminating accumulated step-wise multiplicative drift. Both formulations are supported in `entropic_landweber` (`use_cumulative_form=True` by default), with trapezoidal quadrature employed throughout for all integral evaluations.
 
 ### Implemented Methods
 
 1. **Entropic Landweber (Full Operator)**: Multiplicative gradient descent with Shannon entropy Bregman distance, with or without unit integral normalisation, implementing both the recursive accumulator $\tilde{y}_k$ and step-wise representations.
+
 2. **Randomised / Stochastic Entropic Landweber**: Row-action stochastic mirror descent where operator $A$ is partitioned into $M$ rows, updating via single sampled equations:
-   $$u_{k+1} = u_k c_k^m \exp\left( \lambda M A_{J(k)}^* (y_{J(k)} - A_{J(k)} u_k) \right)$$
+
+   $$
+   u_{k+1} = u_k c_k^m \exp\left( \lambda M A_{J(k)}^{\ast} (y_{J(k)} - A_{J(k)} u_k) \right)
+   $$
+
 3. **Projected Landweber Iteration**:
-   $$u_{k+1} = \left( u_k - \tau A^*(A u_k - y) \right)_+ = \max\left(0, u_k + \tau A^*(y - A u_k)\right)$$
+
+   $$
+   u_{k+1} = \left( u_k - \tau A^{\ast}(A u_k - y) \right)_+ = \max\left(0, u_k + \tau A^{\ast}(y - A u_k)\right)
+   $$
+
 4. **Expectation–Maximisation (EM / Richardson–Lucy)**:
-   $$u_{k+1} = \frac{u_k}{A^* 1} A^*\left( \frac{y}{A u_k} \right)$$
+
+   $$
+   u_{k+1} = \frac{u_k}{A^{\ast} 1} A^{\ast}\left( \frac{y}{A u_k} \right)
+   $$
 
 ---
 
@@ -91,7 +117,7 @@ entropic-landweber/
 │   └── run_figure5.py          # Figure 5: L1 convergence rates for exact data
 ├── tests/
 │   ├── test_algorithms.py      # Tests for monotonicity, positivity, and mass preservation
-│   ├── test_functionals.py     # Tests for entropy and Bregman divergence properties
+│   ├── test_functionals.py     # Tests for entropy and Bregman distance properties
 │   └── test_operators.py       # Adjointness tests <Au, v> = <u, A*v>
 └── figures/                    # Replicated publication figures (PNG and vector PDF)
     ├── figure1.png / figure1.pdf
@@ -169,7 +195,7 @@ python scripts/run_figure1.py
 
 #### Figure 2: Ground Truth Distributions (Section 6.2)
 Visualises the two probability distributions $z_1$ and $z_2$ on $[-2, 2]$:
-- $z_1$: Constructed in the range of the adjoint operator ($1 + \ln z_1 \in \mathcal{R}(A^*)$), satisfying the source condition (30).
+- $z_1$: Constructed in the range of the adjoint operator ($`1 + \ln z_1 \in \mathcal{R}(A^{\ast})`$), satisfying the source condition (30).
 - $z_2$: Three-component Gaussian mixture violating the source condition.
 
 ```bash
@@ -209,7 +235,7 @@ python scripts/run_figure5.py
 
 A comprehensive unit test suite verifies mathematical properties and implementation invariants:
 - **`test_functionals.py`**: Non-negativity and zero-annihilation of the Kullback–Leibler divergence, and entropy calculation.
-- **`test_operators.py`**: Exact adjointness check $\langle Au, v \rangle = \langle u, A^* v \rangle$ for both Fredholm and discrete Fourier operators.
+- **`test_operators.py`**: Exact adjointness check $\langle Au, v \rangle = \langle u, A^{\ast} v \rangle$ for both Fredholm and discrete Fourier operators.
 - **`test_algorithms.py`**: Non-negativity preservation ($u_k \ge 0$), total mass preservation ($\int u_k = 1$ when $m = 1$), and monotonic residual decrease $\frac{1}{2}\|Au_{k+1} - y\|^2 \le \frac{1}{2}\|Au_k - y\|^2$ (Proposition 3.3).
 
 Run the tests using Python's standard `unittest` framework:

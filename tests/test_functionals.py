@@ -1,4 +1,4 @@
-"""Unit tests for entropy, Bregman divergence, and distance functionals."""
+"""Unit tests for entropy, Bregman distance, and distance functionals."""
 
 from __future__ import annotations
 
