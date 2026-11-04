@@ -73,21 +73,21 @@ Because only a single forward operation $A u_k$ is computed per iteration, this 
 
 2. **Randomised / Stochastic Entropic Landweber**: Row-action stochastic mirror descent where operator $A$ is partitioned into $M$ rows, updating via single sampled equations:
 
-   $$
-   u_{k+1} = u_k c_k^m \exp\left( \lambda M A_{J(k)}^{\ast} (y_{J(k)} - A_{J(k)} u_k) \right)
-   $$
+$$
+u_{k+1} = u_k c_k^m \exp\left( \lambda M A_{J(k)}^{\ast} (y_{J(k)} - A_{J(k)} u_k) \right)
+$$
 
 3. **Projected Landweber Iteration**:
 
-   $$
-   u_{k+1} = \left( u_k - \tau A^{\ast}(A u_k - y) \right)_+ = \max\left(0, u_k + \tau A^{\ast}(y - A u_k)\right)
-   $$
+$$
+u_{k+1} = \left( u_k - \tau A^{\ast}(A u_k - y) \right)_+ = \max\left(0, u_k + \tau A^{\ast}(y - A u_k)\right)
+$$
 
 4. **Expectation–Maximisation (EM / Richardson–Lucy)**:
 
-   $$
-   u_{k+1} = \frac{u_k}{A^{\ast} 1} A^{\ast}\left( \frac{y}{A u_k} \right)
-   $$
+$$
+u_{k+1} = \frac{u_k}{A^{\ast} 1} A^{\ast}\left( \frac{y}{A u_k} \right)
+$$
 
 ---
 
