@@ -164,7 +164,6 @@ python scripts/replicate_all.py
 
 Dependencies:
 - `numpy >= 1.24`
-- `scipy >= 1.10`
 - `matplotlib >= 3.7`
 
 ---
